@@ -1,13 +1,13 @@
 <?php
 namespace Punic;
 
-/*
- * Comments marked as @TZWS have been added because it seems than PHP does
- * not support timezones with seconds.
- * Furthermore: the Unicode specs (http://www.unicode.org/reports/tr35/tr35-dates.html#Date_Field_Symbol_Table) says the following:
- * "The ISO8601 basic format with hours, minutes and optional seconds fields. Note: The seconds field is not supported by the
- * ISO8601 specification."
- */
+    /*
+	 * Comments marked as @TZWS have been added because it seems than PHP does
+	 * not support timezones with seconds.
+	 * Furthermore: the Unicode specs (http://www.unicode.org/reports/tr35/tr35-dates.html#Date_Field_Symbol_Table) says the following:
+	 * "The ISO8601 basic format with hours, minutes and optional seconds fields. Note: The seconds field is not supported by the
+	 * ISO8601 specification."
+	 */
 
 /**
  * Date and time related functions
@@ -596,9 +596,9 @@ class Calendar
     }
 
     /**
-     * Retrieve the first weekday for a specific locale (from 0-Sunday to 6-Saturnday)
+     * Retrieve the first weekday for a specific locale (from 0-Sunday to 6-Saturday)
      * @param string $locale='' The locale to use. If empty we'll use the default locale set in \Punic\Data
-     * @return int Returns a number from 0 (Sunday) to 7 (Saturnday)
+     * @return int Returns a number from 0 (Sunday) to 7 (Saturday)
      */
     public static function getFirstWeekday($locale = '')
     {
@@ -623,6 +623,8 @@ class Calendar
      * If it's a string it must be one accepted by {@link getWeekdayName}, and you'll get an array like this: [{id: 0, name: 'Monday', ..., {id: 6, name: 'Sunday'}]
      * @param string $locale='' The locale to use. If empty we'll use the default locale set in \Punic\Data
      * @return array
+     * @throws Exception\BadArgumentType
+     * @throws Exception\ValueNotInList
      */
     public static function getSortedWeekdays($namesWidth = false, $locale = '')
     {
@@ -759,20 +761,23 @@ class Calendar
      * Returns the difference in days between two dates (or between a date and today)
      * @param \DateTime $dateEnd The first date
      * @param \DateTime|null $dateStart=null The final date (if it has a timezone different than $dateEnd, we'll use the one of $dateEnd)
-     * @return int Returns the diffence $dateEnd - $dateStart in days
+     * @return int Returns the difference $dateEnd - $dateStart in days
      * @throws Exception\BadArgumentType
      */
-    public static function getDeltaDays($dateEnd, $dateStart = null)
+    public static function getDeltaDays(\DateTime $dateEnd, \DateTime $dateStart = null)
     {
         if (!is_a($dateEnd, '\\DateTime')) {
             throw new Exception\BadArgumentType($dateEnd, '\\DateTime');
         }
+
         if (empty($dateStart) && ($dateStart !== 0) && ($dateStart !== '0')) {
             $dateStart = new \DateTime('now', $dateEnd->getTimezone());
         }
+
         if (!is_a($dateStart, '\\DateTime')) {
             throw new Exception\BadArgumentType($dateStart, '\\DateTime');
         }
+
         if ($dateStart->getOffset() !== $dateEnd->getOffset()) {
             $dateStart->setTimezone($dateEnd->getTimezone());
         }
@@ -788,13 +793,13 @@ class Calendar
      * Describe an interval between two dates (eg '2 days and 4 hours').
      * @param \DateTime $dateEnd The first date
      * @param \DateTime|null $dateStart=null The final date (if it has a timezone different than $dateEnd, we'll use the one of $dateEnd)
-     * @param int $maxParts=2 The maximim parts (eg with 2 you may have '2 days and 4 hours', with 3 '2 days, 4 hours and 24 minutes')
+     * @param int $maxParts=2 The maximum parts (eg with 2 you may have '2 days and 4 hours', with 3 '2 days, 4 hours and 24 minutes')
      * @param string $width='short' The format name; it can be 'long' (eg '3 seconds'), 'short' (eg '3 s') or 'narrow' (eg '3s')
      * @param string $locale='' The locale to use. If empty we'll use the default locale set in \Punic\Data
      * @return string
      * @throws Exception\BadArgumentType
      */
-    public static function describeInterval($dateEnd, $dateStart = null, $maxParts = 2, $width = 'short', $locale = '')
+    public static function describeInterval(\DateTime $dateEnd, \DateTime $dateStart = null, $maxParts = 2, $width = 'short', $locale = '')
     {
 
         if (!is_a($dateEnd, '\\DateTime')) {
@@ -883,7 +888,7 @@ class Calendar
      * @link http://cldr.unicode.org/translation/date-time
      * @link http://www.unicode.org/reports/tr35/tr35-dates.html#Date_Format_Patterns
      */
-    public static function formatDate($value, $width, $locale = '')
+    public static function formatDate(\DateTime $value, $width, $locale = '')
     {
         $c = is_string($width) ? @substr($width, -1) : '';
         if (($c === '^') || ($c === '*')) {
@@ -935,7 +940,7 @@ class Calendar
      * @link http://cldr.unicode.org/translation/date-time
      * @link http://www.unicode.org/reports/tr35/tr35-dates.html#Date_Format_Patterns
      */
-    public static function formatTime($value, $width, $locale = '')
+    public static function formatTime(\DateTime $value, $width, $locale = '')
     {
         return static::format(
             $value,
@@ -978,7 +983,7 @@ class Calendar
      * @link http://cldr.unicode.org/translation/date-time
      * @link http://www.unicode.org/reports/tr35/tr35-dates.html#Date_Format_Patterns
      */
-    public static function formatDatetime($value, $width, $locale = '')
+    public static function formatDatetime(\DateTime $value, $width, $locale = '')
     {
         $overrideDateFormat = '';
         if (is_string($width)) {
@@ -1044,7 +1049,7 @@ class Calendar
      * @link http://cldr.unicode.org/translation/date-time
      * @link http://www.unicode.org/reports/tr35/tr35-dates.html#Date_Format_Patterns
      */
-    public static function format($value, $format, $locale = '')
+    public static function format(\DateTime $value, $format, $locale = '')
     {
         static $decodeCache = array();
         static $decoderFunctions = array(
@@ -1172,7 +1177,7 @@ class Calendar
      * @param string $locale='' The locale to use. If empty we'll use the default locale set in \Punic\Data
      * @return string Returns the relative name if available, otherwise returns an empty string
      */
-    public static function getDateRelativeName($datetime, $ucFirst = false, $locale = '')
+    public static function getDateRelativeName(\DateTime $datetime, $ucFirst = false, $locale = '')
     {
         $result = '';
         $deltaDays = static::getDeltaDays($datetime);
@@ -1552,9 +1557,9 @@ class Calendar
         $partsMaybeWithSeconds = $partsWithoutSeconds;
         /* @TZWS
         if ($seconds > 0) {
-            $partsMaybeWithSeconds[] = substr('0' . strval($seconds), -2);
+        $partsMaybeWithSeconds[] = substr('0' . strval($seconds), -2);
         }
-        */
+         */
         switch ($count) {
             case 1:
             case 2:
@@ -1634,7 +1639,7 @@ class Calendar
         $minutes2 = substr('0' . strval($minutes), -2);
         /* @TZWS
         $seconds2 = substr('0' . strval($seconds), -2);
-        */
+         */
         $hmMaybe = array($hours2);
         if ($minutes > 0) {
             $hmMaybe[] = $minutes2;
@@ -1642,9 +1647,9 @@ class Calendar
         $hmsMaybe = array($hours2, $minutes2);
         /* @TZWS
         if ($seconds > 0) {
-            $hmsMaybe[] = $seconds2;
+        $hmsMaybe[] = $seconds2;
         }
-        */
+         */
         switch ($count) {
             case 1:
                 $result = $useZ ? 'Z' : implode('', $hmMaybe);
